@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
 with webdriver.Chrome(options=options) as browser:
-    browser.get('https://o-bash.ru/wp-content/uploads/2025/06/Splity-CHIP-PFO-29.06.2025.html?sportorg=1')
+    browser.get('https://www.vlacem.ru/Arhiv/2022/res/21%20-%20Split%20_%2023102022.html?sportorg=1')
     browser.find_element(By.CSS_SELECTOR, 'div.sportorg-settings-row > button').click()
     lables = browser.find_elements(By.CSS_SELECTOR, 'div.sportorg-settings-row')
     for lable in lables:
@@ -19,4 +19,4 @@ with webdriver.Chrome(options=options) as browser:
 
     html = browser.page_source
     splits = MasStartSportorg(html)
-    print(splits.get_group_legs('Мужчины'))
+    print(splits.get_top10_on_each_leg_group('МУЖЧИНЫ'))
