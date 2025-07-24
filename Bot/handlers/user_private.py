@@ -98,7 +98,7 @@ async def sportorg(message: types.Message, state: FSMContext):
             browser.find_element(By.CSS_SELECTOR, 'div.sportorg-settings-row > button').click()
             labels = browser.find_elements(By.CSS_SELECTOR, 'div.sportorg-settings-row')
             for label in labels:
-                if label.text == 'Сплиты (заданное направление)':
+                if label.text == 'Сплиты (все отметки)':
                     label.click()
 
             html = browser.page_source

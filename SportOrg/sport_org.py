@@ -19,4 +19,4 @@ with webdriver.Chrome(options=options) as browser:
 
     html = browser.page_source
     splits = MasStartSportorg(html)
-    print(splits.get_top10_on_each_leg_group('МУЖЧИНЫ'))
+    print(splits.make_person_report('МУЖЧИНЫ', 'Брызгалов Павел'))

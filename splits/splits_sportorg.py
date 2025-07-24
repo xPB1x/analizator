@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from functions import substraction_time
+from functions import substraction_time, find_first_control
 
 
 class SplitSportorg:
@@ -11,7 +11,7 @@ class SplitSportorg:
         """Получает код-html каждой группы"""
         groups = {}
         group_names = [a['id'] for a in self.soup.select('div#results-tables h2') if a.text]
-        group_html = self.soup.select('table.sportorg-table')
+        group_html = self.soup.select('table.sportorg-table > tbody')
         for group_name, group in zip(group_names, group_html):
             groups[group_name] = group
 
@@ -24,81 +24,85 @@ class SplitSportorg:
 
         return person_names
 
-    def get_legs(self):
-        groups = self.groups
-        splits = set()
-        for group_name in groups.keys():
-            splits = splits | set(self.get_group_splits(group_name))
-        return splits
-
-    def get_group_splits(self, group_name):
-        """Ищет порядок прохождения дистанции по названию группы"""
-        group = self.groups[group_name]
-        thead = group.select('thead th')
-
-        return self.get_number_controls(thead)
-
-    @staticmethod
-    def get_number_controls(controls):
-        """2)Собирает список номеров правильного прохождения дистанции"""
-        control_list = []
-        last_control = 'Start'
-
-        for control in controls:
-            if control.text.isdigit() or control.text.strip() == 'F':
-                leg = f"{last_control} -> {control.text}"
-                control_list.append(leg)
-                last_control = control.text
-
-        return control_list
-
-
     def get_person_splits(self, group_name, person_name):
         sportsman = {}
         sportsman[person_name] = {}
         group_html = self.groups[group_name]
-        group_legs = self.get_group_splits(group_name)
-        persons = group_html.select('table.sportorg-table > tbody > tr')
-        for person in persons:
-            if person.select_one('tr > td:nth-child(2)').text.strip() == person_name:
-                splits = person.select('table.table-split tr:nth-child(1)')
-                for split, leg in zip(splits, group_legs):
-                    sportsman[person_name][leg] = split.text.strip()
+        children = group_html.children
+
+        x = 1
+        for child in children:
+            last_control = 'Start'
+            person_info = child.get_text(separator='  ').split('  ')
+            if len(person_info) <= 1:
+                x = 0
+                continue
+            if person_name == person_info[x]:
+                first_control_index = find_first_control(person_info)
+                if first_control_index:
+                    for i in range(first_control_index, len(person_info), 3):
+                        current_control = person_info[i][1:-1].strip()
+                        time = person_info[i + 1]
+
+                        leg = f"{last_control} -> {current_control}"
+                        sportsman[person_name][leg] = time
+                        last_control = current_control
+                    break
 
         return sportsman
 
+    def get_persons_by_group(self, group_name):
+        persons = []
+        group_html = self.groups[group_name]
+        children = group_html.children
+        x = 1
+        for child in children:
+            person_info = child.get_text(separator='  ').split('  ')
+            if len(person_info) <= 1:
+                x = 0
+                continue
+
+            persons.append(person_info[x])
+
+        return persons
+
+    def get_group_splits(self, group_name):
+        splits = []
+        persons = self.get_persons_by_group(group_name)
+        for person_name in persons:
+            person_splits = self.get_person_splits(group_name, person_name)[person_name]
+            for split in person_splits.keys():
+                if split not in splits:
+                    splits.append(split)
+
+        return splits
+
+    def get_legs(self):
+        splits = set()
+
+        groups = self.groups
+        for group_name in groups:
+            splits = splits | set(self.get_group_splits(group_name))
+
+        return sorted(list(splits))
 
     def make_best_split(self, group_name):
-        """Создаёт лучший сплит в группе"""
         group_splits = self.get_group_splits(group_name)
         best_split = {leg: "99:99:99" for leg in group_splits}
-        persons = self.get_persons_by_group(group_name)
 
+        persons = self.get_persons_by_group(group_name)
         for person in persons:
             person_splits = self.get_person_splits(group_name, person)
             for split in person_splits.values():
                 for number, time in split.items():
                     try:
-                        time, place = time.split()
-                        place = int(place[1:-1].strip())
-                    except ValueError:
-                        place = 2
-
-                    if place == 1:
-                        try:
-                            if time < best_split[number]:
-                                best_split[number] = time
-                        except KeyError:
-                            if '\r' in number:
-                                number = number.split('\r')[0].strip()
-                                if time < best_split[number]:
-                                    best_split[number] = time
-
-
-                    elif 'F' in number:
                         if time < best_split[number]:
                             best_split[number] = time
-
+                    except KeyError:
+                        if '\r' in number:
+                            number = number.split('\r')[0].strip()
+                            if time < best_split[number]:
+                                best_split[number] = time
         return best_split
 
     def make_person_report(self, group_name, person_name):
@@ -109,7 +113,6 @@ class SplitSportorg:
         person_splits = self.get_person_splits(group_name, person_name)[person_name]
 
         for leg, time in person_splits.items():
-            time = time[:8]
             try:
                 diff = substraction_time(time, best_split[leg])
             except KeyError:

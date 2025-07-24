@@ -2,7 +2,6 @@ from aiogram import types, Router, F
 from aiogram.filters import CommandStart, Command, or_f
 from aiogram.fsm.context import FSMContext
 
-from Bot.handlers.user_private import type_distance
 from Bot.kbds import reply
 from Bot.states.split_states import SplitStates
 
@@ -12,18 +11,12 @@ sportorg_router = Router()
 @sportorg_router.message(SplitStates.sportorg_splits)
 async def get_group(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    type_distance = data['type_distance']
-    if type_distance.lower() == 'заданное направление':
-        splits = data['splits']
-        groups = [group_name for group_name in splits.groups.keys()]
+    splits = data['splits']
+    groups = [group_name for group_name in splits.groups.keys()]
 
-        await message.answer('Введите одну из предложенных групп', reply_markup=reply.make_group_keyboard(groups))
+    await message.answer('Введите одну из предложенных групп', reply_markup=reply.make_group_keyboard(groups))
 
-        await state.set_state(SplitStates.group_name)
-
-    else:
-        await state.set_state(SplitStates.waiting_for_type_distance)
-        await message.answer('Данный тип дистанции пока что недоступен для анализа')
+    await state.set_state(SplitStates.group_name)
 
 
 @sportorg_router.message(SplitStates.group_name, or_f(F.text.contains('М'), F.text.contains('Ж')))
@@ -52,7 +45,6 @@ async def sportorg_splits(message: types.Message, state: FSMContext):
 @sportorg_router.message(SplitStates.sportorg_analiz, F.text.contains('по'))
 async def sportorg_analiz1(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    data = await state.get_data()
     splits = data['splits']
     group = data['group']
     person = data['name']
@@ -75,7 +67,6 @@ async def sportorg_analiz2(message: types.Message, state: FSMContext):
 
 @sportorg_router.message(SplitStates.sportorg_analiz, F.text.contains('всех'))
 async def sportorg_analiz3(message: types.Message, state: FSMContext):
-    await message.answer('При большом количестве участников может работать медленно')
     data = await state.get_data()
     splits = data['splits']
     group = data['group']
