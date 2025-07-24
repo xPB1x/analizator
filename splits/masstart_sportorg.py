@@ -23,18 +23,6 @@ class MasStartSportorg(SplitSportorg):
         return groups
 
 
-    def get_group_legs(self, group_name):
-        group_legs = []
-        group_html = self.groups[group_name]
-        children = group_html.children
-        for child in children:
-            person_info = child.get_text(separator='  ').split('  ')
-            name = person_info[1]
-            print(name)
-            first_control_index = find_first_control(person_info)
-            for i in range(first_control_index, len(person_info), 3):
-                print(person_info[i], person_info[i+1])
-
     def get_person_splits(self, group_name, person_name):
         sportsman = {}
         sportsman[person_name] = {}

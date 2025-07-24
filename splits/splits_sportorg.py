@@ -29,6 +29,7 @@ class SplitSportorg:
         splits = set()
         for group_name in groups.keys():
             splits = splits | set(self.get_group_splits(group_name))
+        return splits
 
     def get_group_splits(self, group_name):
         """Ищет порядок прохождения дистанции по названию группы"""
