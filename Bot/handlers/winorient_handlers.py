@@ -33,11 +33,12 @@ async def get_group(message: types.Message, state: FSMContext):
         f = False
 
     if f:
-        key = [x for x in splits.groups.keys()][0]
-        key = key[0]
-        if not key.isalpha():
-            response.encoding = 'windows-1251'
-            splits = SplitsWinOrient(response.text)
+        keys = [x for x in splits.groups.keys()]
+        for key in keys:
+            if not key.isalpha():
+                response.encoding = 'windows-1251'
+                splits = SplitsWinOrient(response.text)
+                break
         await state.update_data(splits=splits)
 
         groups = [group_name for group_name in splits.groups.keys()]
