@@ -113,11 +113,24 @@ async def sportorg(message: types.Message, state: FSMContext):
 
 @user_private_router.message(SplitStates.waiting_for_program, F.text.lower().contains('sfr'))
 async def sfr(message: types.Message, state: FSMContext):
-    await message.answer('На данный момент анализ sfr сплитов недоступен')
+    await message.answer('Ожидайте загрузки сплитов SFR', reply_markup=reply.del_kb)
+
+    data = await state.get_data()
+    url = data['url']
+    try:
+        response = requests.get(url)
+        await state.set_state(SplitStates.waiting_for_type_distance)
+        await state.update_data(program='sfr')
+        await state.update_data(response=response)
+
+        await message.answer('Сплиты загружены')
+        await message.answer('Выберите тип дистанции', reply_markup=reply.types_kb)
+    except Exception:
+        await message.answer('Неверный url адресс')
 
 
 @user_private_router.message(SplitStates.waiting_for_program)
-async def sfr(message: types.Message):
+async def unknown_program(message: types.Message):
     await message.answer('Такая программа сплитов недоступна для анализа\nВыберите одну из предложенных')
 
 
@@ -136,4 +149,8 @@ async def type_distance(message: types.Message, state: FSMContext):
             await message.answer('Отправьте любое сообщение, чтобы продолжить', reply_markup=reply.del_kb)
         elif program == 'sportorg':
             await state.set_state(SplitStates.sportorg_splits)
+            await message.answer('Отправьте любое сообщение, чтобы продолжить', reply_markup=reply.del_kb)
+        elif program == 'sfr':
+            print('XXX')
+            await state.set_state(SplitStates.sfr_splits)
             await message.answer('Отправьте любое сообщение, чтобы продолжить', reply_markup=reply.del_kb)

@@ -9,6 +9,7 @@ from dotenv import find_dotenv, load_dotenv
 from Bot.handlers.user_private import user_private_router
 from Bot.handlers.sportorg_handlers import sportorg_router
 from Bot.handlers.winorient_handlers import winorient_router
+from Bot.handlers.sfr_handlers import sfr_router
 from Bot.handlers.bot_cmds_list import private
 
 load_dotenv(find_dotenv())
@@ -20,6 +21,7 @@ dp = Dispatcher()
 dp.include_router(user_private_router)
 dp.include_router(sportorg_router)
 dp.include_router(winorient_router)
+dp.include_router(sfr_router)
 
 
 async def main():

@@ -18,6 +18,8 @@ class SplitStates(StatesGroup):
 
     sfr_splits = State()
     sfr_analiz = State()
+    sfr_group = State()
+    sfr_name = State()
 
     texts = {
         'SplitStates:waiting_for_url': 'Отправьте ссылку на сплиты',
