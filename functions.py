@@ -40,6 +40,11 @@ def find_first_control(sportsman_info: list[str]):
         if re.search(r'\(\s*\d+\s*\)', sportsman_info[i]):
             return i
 
+def find_first_control2(sportsman_info: list[str]):
+    for i in range(len(sportsman_info)):
+        if re.search(r'\[\s*\d+\s*', sportsman_info[i]):
+            return i
+
 
 if __name__ == '__main__':
     pass

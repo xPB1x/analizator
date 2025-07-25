@@ -126,7 +126,6 @@ async def winorient_analiz4_1(message: types.Message, state: FSMContext):
     data = await state.get_data()
     splits = data['splits']
     legs = splits.get_legs()
-    print(legs)
 
     await message.answer('Выберите перегон из предложенного списка', reply_markup=reply.make_group_keyboard(legs))
 
