@@ -73,7 +73,7 @@ class SplitsWinOrient:
                             try:
                                 time, number = split.split()
                             except ValueError:
-                                print(split)
+                                continue
                         else:
                             time = split[0]
                             number = 'Finish'

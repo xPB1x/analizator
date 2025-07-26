@@ -84,21 +84,18 @@ class RelayWinOrient(SplitsWinOrient):
         return sportsman
 
     def get_group_splits(self, group_name):
+        splits = []
         persons = self.get_persons_by_group(group_name)
-        legs = []
-        for person in persons:
-            last_control = 'Start'
-            values = self.get_person_splits(group_name, person).values()
-            for splits in values:
-                for split in splits:
-                    number = split.split()[-1]
-                    leg = f"{last_control} -> {number}"
-                    if leg not in legs:
-                        legs.append(leg)
+        for person_name in persons:
+            try:
+                person_splits = self.get_person_splits(group_name, person_name)[person_name]
+            except:
+                continue
+            for split in person_splits.keys():
+                if split not in splits:
+                    splits.append(split)
 
-                    last_control = number
-
-        return legs
+        return splits
 
     def get_legs(self):
         groups = self.groups

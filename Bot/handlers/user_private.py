@@ -25,32 +25,6 @@ async def help(message: types.Message):
     await message.answer('На данный момент помощь нужна мне')
 
 
-@user_private_router.message(StateFilter("*"), F.text.casefold() == "назад")
-async def back(message: types.Message, state: FSMContext):
-    current_state = await state.get_state()
-
-    if current_state is None:
-        await message.answer('Ниже некуда')
-
-    previous_state = None
-    for step in SplitStates.__all_states__:
-        if step.state == current_state:
-            await state.set_state(previous_state)
-            break
-        previous_state = step
-
-    if previous_state == SplitStates.waiting_for_url:
-        await message.answer('Салам алейкум', reply_markup=reply.start_kb)
-
-    elif previous_state == SplitStates.waiting_for_program:
-        await message.answer('Выберите программу сплитов', reply_markup=reply.analiz_kb)
-        await state.set_state(SplitStates.waiting_for_program)
-
-    else:
-        await state.set_state(SplitStates.waiting_for_type_distance)
-        await message.answer('Выберите тип дистанции', reply_markup=reply.types_kb)
-
-
 @user_private_router.message(F.text.lower().contains('анализ'))
 async def analiz(message: types.Message, state: FSMContext):
     await message.answer('Пришлите ссылку на сплиты', reply_markup=reply.del_kb)
@@ -151,6 +125,5 @@ async def type_distance(message: types.Message, state: FSMContext):
             await state.set_state(SplitStates.sportorg_splits)
             await message.answer('Отправьте любое сообщение, чтобы продолжить', reply_markup=reply.del_kb)
         elif program == 'sfr':
-            print('XXX')
             await state.set_state(SplitStates.sfr_splits)
             await message.answer('Отправьте любое сообщение, чтобы продолжить', reply_markup=reply.del_kb)

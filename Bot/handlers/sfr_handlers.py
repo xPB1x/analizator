@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 
 from Bot.kbds import reply
 from splits.sfr_splits import SFRSplits
+from splits.sfr_masstart import SFRMasStart
 from Bot.states.split_states import SplitStates
 
 
@@ -11,22 +12,40 @@ sfr_router = Router()
 
 @sfr_router.message(SplitStates.sfr_splits)
 async def get_group(message: types.Message, state: FSMContext):
+    f = True
     data = await state.get_data()
     response = data['response']
     response.encoding = 'utf-8'
 
-    splits = SFRSplits(response.text)
-
-    key = [x for x in splits.groups.keys()][0]
-    if not key[0].isalpha():
-        response.encoding = 'windows-1251'
+    type_distance = data['type_distance']
+    if type_distance.lower() == 'заданное направление':
         splits = SFRSplits(response.text)
+        key = [x for x in splits.groups.keys()][0]
+        if not key[0].isalpha():
+            response.encoding = 'windows-1251'
+            splits = SFRSplits(response.text)
 
-    await state.update_data(splits=splits)
+    elif type_distance.lower() == 'общий старт':
+        splits = SFRMasStart(response.text)
+        key = [x for x in splits.groups.keys()][0]
+        if not key[0].isalpha():
+            response.encoding = 'windows-1251'
+            splits = SFRMasStart(response.text)
 
-    groups = [group_name for group_name in splits.groups.keys()]
-    await message.answer('Введите одну из предложенных групп', reply_markup=reply.make_group_keyboard(groups))
-    await state.set_state(SplitStates.sfr_group)
+    else:
+        f = False
+
+    if f:
+
+        await state.update_data(splits=splits)
+
+        groups = [group_name for group_name in splits.groups.keys()]
+        await message.answer('Введите одну из предложенных групп', reply_markup=reply.make_group_keyboard(groups))
+        await state.set_state(SplitStates.sfr_group)
+    else:
+        await message.answer('На данный момент, выбранный тип дистанции недостпен для анализа SFR сплитов')
+        await state.set_state(SplitStates.waiting_for_type_distance)
+        await message.answer('Выберите тип дистанции', reply_markup=reply.types_kb)
 
 
 @sfr_router.message(SplitStates.sfr_group)

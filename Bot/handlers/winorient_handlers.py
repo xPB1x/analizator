@@ -22,25 +22,40 @@ async def get_group(message: types.Message, state: FSMContext):
 
     if type_distance.lower() == 'заданное направление':
         splits = SplitsWinOrient(response.text)
+        keys = [x for x in splits.groups.keys()]
+        for key in keys:
+            for char in key:
+                if not (char.isalpha() or char.isdigit()):
+                    response.encoding = 'windows-1251'
+                    splits = RelayWinOrient(response.text)
+                    break
 
     elif type_distance.lower() == 'общий старт':
         splits = MasStartWinOrient(response.text)
+        keys = [x for x in splits.groups.keys()]
+        for key in keys:
+            for char in key:
+                if not (char.isalpha() or char.isdigit()):
+                    response.encoding = 'windows-1251'
+                    splits = RelayWinOrient(response.text)
+                    break
 
     elif type_distance.lower() == 'эстафета':
         splits = RelayWinOrient(response.text)
+        keys = [x for x in splits.groups.keys()]
+        print(splits.groups.keys())
+        for key in keys:
+            for char in key:
+                if not (char.isalpha() or char.isdigit()):
+                    response.encoding = 'windows-1251'
+                    splits = RelayWinOrient(response.text)
+                    break
 
     else:
         f = False
 
     if f:
-        keys = [x for x in splits.groups.keys()]
-        for key in keys:
-            if not key.isalpha():
-                response.encoding = 'windows-1251'
-                splits = SplitsWinOrient(response.text)
-                break
         await state.update_data(splits=splits)
-
         groups = [group_name for group_name in splits.groups.keys()]
         await message.answer('Введите одну из предложенных групп', reply_markup=reply.make_group_keyboard(groups))
         await state.set_state(SplitStates.winorient_group)

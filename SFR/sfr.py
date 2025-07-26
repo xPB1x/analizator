@@ -13,4 +13,6 @@ if not key[0].isalpha():
     response.encoding = 'windows-1251'
     splits = SFRMasStart(response.text)
 
-print(splits.make_person_report('М21', 'МАКСИМЕНКО МИХАИЛ'))
+legs = splits.get_group_splits('М21')
+for leg in legs:
+    print(splits.get_top10_on_leg(leg))

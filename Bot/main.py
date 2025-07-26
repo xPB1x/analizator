@@ -6,6 +6,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import BotCommandScopeAllPrivateChats
 from dotenv import find_dotenv, load_dotenv
 
+from Bot.handlers.back_handler import back_router
 from Bot.handlers.user_private import user_private_router
 from Bot.handlers.sportorg_handlers import sportorg_router
 from Bot.handlers.winorient_handlers import winorient_router
@@ -18,6 +19,7 @@ load_dotenv(find_dotenv())
 bot = Bot(token=os.getenv('TOKEN'))
 dp = Dispatcher()
 
+dp.include_router(back_router)
 dp.include_router(user_private_router)
 dp.include_router(sportorg_router)
 dp.include_router(winorient_router)
