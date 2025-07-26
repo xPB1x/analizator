@@ -20,7 +20,6 @@ async def back(message: types.Message, state: FSMContext):
 
     previous_state = None
     for step in SplitStates.__all_states__:
-        print(step)
         if step.state == current_state:
             await state.set_state(previous_state)
             break
@@ -49,12 +48,50 @@ async def back(message: types.Message, state: FSMContext):
         else:
             data = await state.get_data()
             splits = data['splits']
-            await state.set_state(SplitStates.winorient_group)
             groups = [group_name for group_name in splits.groups.keys()]
+            await state.set_state(SplitStates.winorient_group)
             await message.answer('Введите одну из предложенных групп', reply_markup=reply.make_group_keyboard(groups))
 
     elif data['program'] == 'sportorg':
-        pass
+        if current_state == SplitStates.sportorg_analiz:
+            data = await state.get_data()
+            group = data['group']
+            splits = data['splits']
+            persons = splits.get_persons_by_group(group)
+            await state.update_data(group=group)
+            await message.answer('Выберите участника', reply_markup=reply.make_group_keyboard(persons))
+            await state.set_state(SplitStates.person_name)
+
+        elif current_state == SplitStates.group_name:
+            await state.set_state(SplitStates.waiting_for_type_distance)
+            await message.answer('Выберите тип дистанции', reply_markup=reply.types_kb)
+
+        else:
+            data = await state.get_data()
+            splits = data['splits']
+            groups = [group_name for group_name in splits.groups.keys()]
+            await message.answer('Введите одну из предложенных групп', reply_markup=reply.make_group_keyboard(groups))
+            await state.set_state(SplitStates.group_name)
+
 
     elif data['program'] == 'sfr':
-        pass
+        if current_state == SplitStates.sfr_analiz:
+            data = await state.get_data()
+            group = data['group']
+            splits = data['splits']
+            persons = splits.get_persons_by_group(group)
+            await state.update_data(group=group)
+            await message.answer('Выберите участника', reply_markup=reply.make_group_keyboard(persons))
+            await state.set_state(SplitStates.sfr_name)
+
+        elif current_state == SplitStates.sfr_group:
+            await state.set_state(SplitStates.waiting_for_type_distance)
+            await message.answer('Выберите тип дистанции', reply_markup=reply.types_kb)
+
+        else:
+            data = await state.get_data()
+            splits = data['splits']
+            groups = [group_name for group_name in splits.groups.keys()]
+            await message.answer('Введите одну из предложенных групп', reply_markup=reply.make_group_keyboard(groups))
+            await state.set_state(SplitStates.sfr_group)
+
