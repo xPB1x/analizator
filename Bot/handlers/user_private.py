@@ -67,16 +67,14 @@ async def sportorg(message: types.Message, state: FSMContext):
     data = await state.get_data()
     url = data['url']
     options = Options()
-    options.add_argument('--headless=new')  # Новый режим headless (для Chrome >= 109)
-    options.add_argument('--no-sandbox')  # Иногда требуется в Linux
-    options.add_argument('--disable-dev-shm-usage')  # Особенно в Docker / VPS
-
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
     try:
-        # Используй менеджер контекста для гарантии закрытия браузера
         with webdriver.Chrome(options=options) as browser:
             browser.get(url)
 
-            await asyncio.sleep(1)  # Небольшая задержка, если страница долго грузится
+            await asyncio.sleep(1)
 
             browser.find_element(By.CSS_SELECTOR, 'div.sportorg-settings-row > button').click()
             labels = browser.find_elements(By.CSS_SELECTOR, 'div.sportorg-settings-row')
@@ -93,8 +91,9 @@ async def sportorg(message: types.Message, state: FSMContext):
             await message.answer('👇Выберите тип дистанции', reply_markup=reply.types_kb)
 
     except Exception as e:
-        print(f"Ошибка: {e}")  # Лог на сервер
+        print(f"Ошибка: {e}")
         await message.answer('❌Неверный URL или ошибка при загрузке❌')
+
 
 
 @user_private_router.message(SplitStates.waiting_for_program, F.text.lower().contains('sfr'))
