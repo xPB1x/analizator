@@ -40,7 +40,7 @@ async def get_group(message: types.Message, state: FSMContext):
         await state.update_data(splits=splits)
 
         groups = [group_name for group_name in splits.groups.keys()]
-        await message.answer('Введите одну из предложенных групп', reply_markup=reply.make_group_keyboard(groups))
+        await message.answer('👇Введите одну из предложенных групп♂️♀️', reply_markup=reply.make_group_keyboard(groups))
         await state.set_state(SplitStates.sfr_group)
     else:
         await message.answer('На данный момент, выбранный тип дистанции недостпен для анализа SFR сплитов')
@@ -57,11 +57,11 @@ async def get_person(message: types.Message, state: FSMContext):
         persons = [person for person in splits.get_persons_by_group(group)]
         await state.update_data(group=group)
 
-        await message.answer('Выберите участника', reply_markup=reply.make_group_keyboard(persons))
+        await message.answer('👇Выберите участника️🧍‍♂️🧍‍', reply_markup=reply.make_group_keyboard(persons))
 
         await state.set_state(SplitStates.sfr_name)
     else:
-        await message.answer('Такой группы не существует')
+        await message.answer('🕵️‍♂️Такой группы не существует🕵️‍♂️')
 
 
 @sfr_router.message(SplitStates.sfr_name)
@@ -73,10 +73,10 @@ async def sportorg_splits(message: types.Message, state: FSMContext):
     if name in splits.get_persons_by_group(group):
         await state.update_data(name=name)
 
-        await message.answer('Выберете действие', reply_markup=reply.func_kb)
+        await message.answer('👾Выберете действие👾', reply_markup=reply.func_kb)
         await state.set_state(SplitStates.sfr_analiz)
     else:
-        await message.answer('Такого участника нет в выбранной группе')
+        await message.answer('🦸‍♂️Такого участника нет в выбранной группе🦸‍♂️')
 
 
 @sfr_router.message(SplitStates.sfr_analiz, F.text.contains('по'))
@@ -88,7 +88,7 @@ async def sfr_analiz1(message: types.Message, state: FSMContext):
     person = data['name']
     msg = splits.make_person_report(group, person)
     await message.answer(msg)
-    await message.answer('Выберете действие', reply_markup=reply.func_kb)
+    await message.answer('👾Выберете действие👾', reply_markup=reply.func_kb)
 
 
 @sfr_router.message(SplitStates.sfr_analiz, F.text.contains('группе'))
@@ -101,7 +101,7 @@ async def sfr_analiz2(message: types.Message, state: FSMContext):
     for leg in group_legs:
         await message.answer(splits.get_top10_on_leg_in_group(group, leg))
 
-    await message.answer('Выберете действие', reply_markup=reply.func_kb)
+    await message.answer('👾Выберете действие👾', reply_markup=reply.func_kb)
 
 
 @sfr_router.message(SplitStates.sfr_analiz, F.text.contains('всех'))
@@ -117,7 +117,7 @@ async def sfr_analiz3(message: types.Message, state: FSMContext):
         if top:
             await message.answer(top)
 
-    await message.answer('Выберете действие', reply_markup=reply.func_kb)
+    await message.answer('👾Выберете действие👾', reply_markup=reply.func_kb)
 
 
 @sfr_router.message(SplitStates.sfr_analiz, F.text.contains('конкретном'))
@@ -126,7 +126,7 @@ async def sfr_analiz4_1(message: types.Message, state: FSMContext):
     splits = data['splits']
     legs = splits.get_legs()
 
-    await message.answer('Выберите перегон из предложенного списка', reply_markup=reply.make_group_keyboard(legs))
+    await message.answer('Выберите перегон из предложенного списка📃', reply_markup=reply.make_group_keyboard(legs))
 
 
 @sfr_router.message(SplitStates.sfr_analiz, F.text.contains('->'))
@@ -140,6 +140,6 @@ async def sfr_analiz4_2(message: types.Message, state: FSMContext):
 
     await message.answer(splits_leg)
 
-@sfr_router.message(SplitStates.winorient_analiz)
+@sfr_router.message(SplitStates.sfr_analiz)
 async def winorient_analiz(message: types.Message):
-    await message.answer('Такой функции не существует.\nВыберите одно из предложенных действий')
+    await message.answer('🥱Такой функции не существует.🥱\n👇Выберите одно из предложенных действий👇')
