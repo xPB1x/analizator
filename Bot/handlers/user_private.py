@@ -2,13 +2,14 @@ from aiogram import types, Router, F
 from aiogram.filters import CommandStart, Command, or_f, StateFilter
 from aiogram.fsm.context import FSMContext
 
+from pathlib import Path
+
 import requests
 import asyncio
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from splits.splits_sportorg import SplitSportorg
-from splits.splits_winorient import SplitsWinOrient
 
 from Bot.kbds import reply
 from Bot.states.split_states import SplitStates
@@ -27,10 +28,28 @@ async def help(message: types.Message):
     await message.answer('На данный момент помощь нужна мне')
 
 
+@user_private_router.message(Command('programs'))
+async def programs(message: types.Message):
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+    print(BASE_DIR)
+    IMG_DIR = BASE_DIR / "Bot/images"
+    print(IMG_DIR)
+    imges = {
+        'WinOrient': types.FSInputFile(IMG_DIR / 'WinOrient.PNG'),
+        'SportOrg': types.FSInputFile(IMG_DIR / 'SportOrg.PNG'),
+        'SFR': types.FSInputFile(IMG_DIR / 'SFR.PNG'),
+    }
+
+    await message.answer("К анализу доступны такие программы, как: ")
+    for program_name, img in imges.items():
+        await message.answer_photo(img, caption=program_name)
+
+
 @user_private_router.message(F.text.lower().contains('анализ'))
 async def analiz(message: types.Message, state: FSMContext):
     await message.answer('Пришлите ссылку на сплиты🏃‍♂️📊🔗', reply_markup=reply.del_kb)
     await state.set_state(SplitStates.waiting_for_url)
+
 
 @user_private_router.message(SplitStates.waiting_for_url)
 async def choose_program(message: types.Message, state: FSMContext):
@@ -54,6 +73,9 @@ async def winorient(message: types.Message, state: FSMContext):
 
         await message.answer('✅Сплиты загружены✅')
         await message.answer('👇Выберите тип дистанции', reply_markup=reply.types_kb)
+        await message.answer('❗Важно❗\nЕсли ваши сплиты имеют формат ЧЧ:ММ:СС(№КП) или ММ:СС(№КП) '
+                             'без указания места при заданном направлении, '
+                             'то выберите "общий старт"')
     except Exception:
         await message.answer('❌Неверный url адресс❌')
 
@@ -89,11 +111,38 @@ async def sportorg(message: types.Message, state: FSMContext):
 
             await message.answer('✅Сплиты загружены✅', reply_markup=reply.types_kb)
             await message.answer('👇Выберите тип дистанции', reply_markup=reply.types_kb)
+            f = 0
 
     except Exception as e:
         print(f"Ошибка: {e}")
-        await message.answer('❌Неверный URL или ошибка при загрузке❌')
+        await message.answer('Произошла ошибка при выборе сплитов в разделе settings.\n'
+                             'Возможно вы прислали ссылку с сплитами.\n'
+                             'Если в течении минуты придет ещё одно сообщение об ошибке, то '
+                             'попробуйте прислать ссылку без включенных сплитов')
+        f = 1
 
+    if f:
+        try:
+            with webdriver.Chrome(options=options) as browser:
+                browser.get(url)
+
+                html = browser.page_source
+                splits = SplitSportorg(html)
+                groups = splits.groups.keys()
+                for group in groups:
+                    if splits.get_top10_on_each_leg_group(group).strip():
+                        await message.answer('❌Неверный URL или ошибка при загрузке❌')
+                        break
+                else:
+                    await state.update_data(splits=splits)
+
+                    await message.answer('✅Сплиты загружены✅')
+                    await message.answer('👇Выберите тип дистанции', reply_markup=reply.types_kb)
+
+
+        except Exception as e:
+            print(f"Ошибка: {e}")
+            await message.answer('❌Неверный URL или ошибка при загрузке❌')
 
 
 @user_private_router.message(SplitStates.waiting_for_program, F.text.lower().contains('sfr'))

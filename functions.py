@@ -47,4 +47,4 @@ def find_first_control2(sportsman_info: list[str]):
 
 
 if __name__ == '__main__':
-    pass
+    print(substraction_time('00:48:51', '00:48:36'))

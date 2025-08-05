@@ -27,7 +27,7 @@ async def get_group(message: types.Message, state: FSMContext):
             for char in key:
                 if not (char.isalpha() or char.isdigit()):
                     response.encoding = 'windows-1251'
-                    splits = RelayWinOrient(response.text)
+                    splits = SplitsWinOrient(response.text)
                     break
 
     elif type_distance.lower() == 'общий старт':
@@ -37,7 +37,7 @@ async def get_group(message: types.Message, state: FSMContext):
             for char in key:
                 if not (char.isalpha() or char.isdigit()):
                     response.encoding = 'windows-1251'
-                    splits = RelayWinOrient(response.text)
+                    splits = MasStartWinOrient(response.text)
                     break
 
     elif type_distance.lower() == 'эстафета':
@@ -70,7 +70,7 @@ async def get_person(message: types.Message, state: FSMContext):
     group = message.text.strip()
     splits = data['splits']
     if group in splits.groups.keys():
-        persons = [person for person in splits.get_persons_by_group(group)]
+        persons = splits.get_persons_by_group(group)
         await state.update_data(group=group)
 
         await message.answer('👇Выберите участника️🧍‍♂️🧍‍', reply_markup=reply.make_group_keyboard(persons))

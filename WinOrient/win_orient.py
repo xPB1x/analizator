@@ -5,15 +5,15 @@ from splits.splits_sportorg import SplitSportorg
 from splits.splits_winorient import SplitsWinOrient
 
 
-url1 = 'https://www.vlacem.ru/Arhiv/2025/res/8%20-%20Split%20_%2018052025.htm'
+url1 = 'https://vrnfso.ru/download/2025/20250720_split.htm'
 url2 = 'https://www.vlacem.ru/Arhiv/2025/VS%20_%20Kovrov/res/3%20-%20Split%20_%2003062025.htm'
 response = requests.get(url1)
 response.encoding = 'utf-8'
-splits = RelayWinOrient(response.text)
-# keys = [x for x in splits.groups.keys()]
-# for key in keys:
-#     if not key.isalpha():
-#         response.encoding = 'windows-1251'
-#         splits = SplitsWinOrient(response.text)
-#         break
-print(splits.get_legs())
+splits = SplitsWinOrient(response.text)
+keys = [x for x in splits.groups.keys()]
+for key in keys:
+    if not key.isalpha():
+        response.encoding = 'windows-1251'
+        splits = MasStartWinOrient(response.text)
+        break
+print(splits.make_person_report('М21', 'Харченко Александр'))

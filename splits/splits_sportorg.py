@@ -1,3 +1,6 @@
+import re
+from logging import exception
+
 from bs4 import BeautifulSoup
 from functions import substraction_time, find_first_control
 
@@ -18,11 +21,19 @@ class SplitSportorg:
         return groups
 
     def get_persons_by_group(self, group_name):
-        """Создаёт словарь спортсменов с их html строкой"""
-        group = self.groups[group_name]
-        person_names = [td.text for td in group.select('table.sportorg-table td:nth-child(2)')]
+        persons = []
+        group_html = self.groups[group_name]
+        children = group_html.children
+        x = 1
+        for child in children:
+            person_info = child.get_text(separator='  ').split('  ')
+            if len(person_info) <= 1:
+                x = 0
+                continue
 
-        return person_names
+            persons.append(person_info[x])
+
+        return persons
 
     def get_person_splits(self, group_name, person_name):
         sportsman = {}
@@ -40,14 +51,36 @@ class SplitSportorg:
             if person_name == person_info[x]:
                 first_control_index = find_first_control(person_info)
                 if first_control_index:
+                    total_time = person_info[first_control_index-3]
                     for i in range(first_control_index, len(person_info), 3):
+                        if re.search(r"\d\d:\d\d:\d\d\s\(", person_info[i]):
+                            break
                         current_control = person_info[i][1:-1].strip()
                         time = person_info[i + 1]
 
                         leg = f"{last_control} -> {current_control}"
                         sportsman[person_name][leg] = time
                         last_control = current_control
+                    else:
+                        try:
+                            leg = f"{last_control} -> Finish"
+                            last_control_time = person_info[i + 2]
+                            finish_time = substraction_time(total_time, last_control_time)
+                            sportsman[person_name][leg] = finish_time
+                        except Exception as e:
+                            pass
+                        break
+                    try:
+                        leg = f"{last_control} -> Finish"
+                        last_control_time = person_info[i-1]
+                        finish_time = substraction_time(total_time, last_control_time)
+                        sportsman[person_name][leg] = finish_time
+                    except Exception as e:
+                        pass
+                        break
+
                     break
+
 
         return sportsman
 

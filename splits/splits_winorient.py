@@ -31,14 +31,17 @@ class SplitsWinOrient:
         persons = []
         group_html = self.groups[group_name]
         children = group_html.children
+        new_person = False
         for child in children:
             if child.name == 'u':
+                new_person = True
                 continue
             child = [x.strip() for x in child.text.strip().split('   ') if x != '']
             for x in child:
-                if re.search(r'\d+\s+[А-Я][а-я]+\s+[А-Я][а-я]', x):
+                if re.search(r'\d+\s+[А-Я][а-я]+\s+[А-Я][а-я]', x) and new_person:
                     current_name = ' '.join(x.split()[1:]).strip()
                     persons.append(current_name)
+                    new_person = False
 
         return persons
 
