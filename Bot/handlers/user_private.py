@@ -34,14 +34,14 @@ async def programs(message: types.Message):
     print(BASE_DIR)
     IMG_DIR = BASE_DIR / "Bot/images"
     print(IMG_DIR)
-    imges = {
+    imgs = {
         'WinOrient': types.FSInputFile(IMG_DIR / 'WinOrient.PNG'),
         'SportOrg': types.FSInputFile(IMG_DIR / 'SportOrg.PNG'),
         'SFR': types.FSInputFile(IMG_DIR / 'SFR.PNG'),
     }
 
     await message.answer("К анализу доступны такие программы, как: ")
-    for program_name, img in imges.items():
+    for program_name, img in imgs.items():
         await message.answer_photo(img, caption=program_name)
 
 
