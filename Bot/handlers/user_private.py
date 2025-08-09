@@ -23,17 +23,10 @@ async def start_cmd(message: types.Message, state: FSMContext):
     await state.clear()
 
 
-@user_private_router.message(or_f(Command('help'), (F.text.lower() == 'помощь')))
-async def help(message: types.Message):
-    await message.answer('На данный момент помощь нужна мне')
-
-
-@user_private_router.message(Command('programs'))
+@user_private_router.message(or_f(Command('help'), F.text.lower() == 'помощь'))
 async def programs(message: types.Message):
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
-    print(BASE_DIR)
     IMG_DIR = BASE_DIR / "Bot/images"
-    print(IMG_DIR)
     imgs = {
         'WinOrient': types.FSInputFile(IMG_DIR / 'WinOrient.PNG'),
         'SportOrg': types.FSInputFile(IMG_DIR / 'SportOrg.PNG'),
@@ -77,7 +70,7 @@ async def winorient(message: types.Message, state: FSMContext):
                              'без указания места при заданном направлении, '
                              'то выберите "общий старт"')
     except Exception:
-        await message.answer('❌Неверный url адресс❌')
+        await message.answer('❌Неверный url адрес❌')
 
 
 @user_private_router.message(SplitStates.waiting_for_program, F.text.lower().contains('sportorg'))
@@ -160,7 +153,7 @@ async def sfr(message: types.Message, state: FSMContext):
         await message.answer('✅Сплиты загружены✅')
         await message.answer('👇Выберите тип дистанции', reply_markup=reply.types_kb)
     except Exception:
-        await message.answer('❌Неверный url адресс❌')
+        await message.answer('❌Неверный url адрес❌')
 
 
 @user_private_router.message(SplitStates.waiting_for_program)

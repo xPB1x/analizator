@@ -26,9 +26,18 @@ dp.include_router(winorient_router)
 dp.include_router(sfr_router)
 
 
+async def set_bot_commands(bot: Bot):
+    commands = [
+        types.BotCommand(command="start", description="Запустить бота"),
+        types.BotCommand(command="help", description="Покажет доступные для анализа программы"),
+    ]
+    await bot.set_my_commands(commands)
+
+
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
-    await bot.set_my_commands(commands=private, scope=BotCommandScopeAllPrivateChats())
+    await set_bot_commands(bot)
     await dp.start_polling(bot)
 
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())

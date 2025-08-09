@@ -25,7 +25,7 @@ async def get_group(message: types.Message, state: FSMContext):
         keys = [x for x in splits.groups.keys()]
         for key in keys:
             for char in key:
-                if not (char.isalpha() or char.isdigit()):
+                if not (char.isalpha() or char.isdigit() or char in {' ', '-'}):
                     response.encoding = 'windows-1251'
                     splits = SplitsWinOrient(response.text)
                     break
@@ -35,9 +35,9 @@ async def get_group(message: types.Message, state: FSMContext):
         keys = [x for x in splits.groups.keys()]
         for key in keys:
             for char in key:
-                if not (char.isalpha() or char.isdigit()):
+                if not (char.isalpha() or char.isdigit() or char in {' ', '-'}):
                     response.encoding = 'windows-1251'
-                    splits = MasStartWinOrient(response.text)
+                    splits = SplitsWinOrient(response.text)
                     break
 
     elif type_distance.lower() == 'эстафета':
@@ -45,9 +45,9 @@ async def get_group(message: types.Message, state: FSMContext):
         keys = [x for x in splits.groups.keys()]
         for key in keys:
             for char in key:
-                if not (char.isalpha() or char.isdigit()):
+                if not (char.isalpha() or char.isdigit() or char in {' ', '-'}):
                     response.encoding = 'windows-1251'
-                    splits = RelayWinOrient(response.text)
+                    splits = SplitsWinOrient(response.text)
                     break
 
     else:
