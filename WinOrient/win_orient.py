@@ -18,4 +18,4 @@ for key in keys:
             splits = SplitsWinOrient(response.text)
             break
 
-print(splits.groups.keys())
+print(splits.comparing_peoples('Мужчины', ['Брызгалов Павел', 'Горин Михаил', 'Рогов Илья']))

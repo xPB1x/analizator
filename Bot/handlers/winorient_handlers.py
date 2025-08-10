@@ -95,7 +95,7 @@ async def sportorg_splits(message: types.Message, state: FSMContext):
         await message.answer('🦸‍♂️Такого участника нет в выбранной группе🦸‍♂️')
 
 
-@winorient_router.message(SplitStates.winorient_analiz, F.text.contains('по'))
+@winorient_router.message(SplitStates.winorient_analiz, F.text.contains('перегонам'))
 async def winorient_analiz1(message: types.Message, state: FSMContext):
     data = await state.get_data()
 
@@ -154,6 +154,57 @@ async def winorient_analiz4_2(message: types.Message, state: FSMContext):
     splits_leg = splits.get_top10_on_leg(leg)
 
     await message.answer(splits_leg)
+
+
+@winorient_router.message(SplitStates.winorient_analiz, F.text.contains('Сравнить'))
+async def winorient_analiz(message: types.Message, state: FSMContext):
+    await state.set_state(SplitStates.get_count_persons)
+    await message.answer('Введите кол-во человек для сравнения', reply_markup=reply.del_kb)
+
+@winorient_router.message(SplitStates.get_count_persons)
+async def winorient_get_count_persons(message:types.Message, state:FSMContext):
+    count = message.text.strip()
+    if count.isdigit() and int(count) >= 0:
+        count = int(count)
+        data = await state.get_data()
+        splits = data['splits']
+        group = data['group']
+        persons = splits.get_persons_by_group(group)
+
+        await state.update_data(count=count)
+        await state.update_data(persons=[])
+        await state.set_state(SplitStates.get_names_for_comparing)
+
+        await message.answer('👇Выберите участника️🧍‍♂️🧍‍', reply_markup=reply.make_group_keyboard(persons))
+    else:
+        await message.answer("Введите ПОЛОЖИТЕЛЬНОЕ ЧИСЛО")
+
+@winorient_router.message(SplitStates.get_names_for_comparing)
+async def choose_persons(message:types.Message, state:FSMContext):
+    person = message.text.strip()
+    data = await state.get_data()
+    count = data['count']
+    choosen_persons = data['persons']
+    group = data['group']
+    splits: SplitsWinOrient = data['splits']
+
+    if person in splits.get_persons_by_group(group):
+        count -= 1
+        choosen_persons.append(person)
+        if count > 0:
+            persons = splits.get_persons_by_group(group)
+            await message.answer(f'Осталось выбрать {count} спортсменов', reply_markup=reply.make_group_keyboard(persons))
+            await state.update_data(count=count)
+            await state.update_data(persons=choosen_persons)
+        else:
+            group_legs = splits.get_group_splits(group)
+            await message.answer(splits.comparing_peoples(group, choosen_persons))
+            await state.set_state(SplitStates.winorient_analiz)
+            await message.answer('👾Выберете действие👾', reply_markup=reply.func_kb)
+    else:
+        await message.answer("Выбран неопознанный спортсмен")
+        persons = splits.get_persons_by_group(group)
+        await message.answer(f'Осталось выбрать {count} спортсменов', reply_markup=reply.make_group_keyboard(persons))
 
 @winorient_router.message(SplitStates.winorient_analiz)
 async def winorient_analiz(message: types.Message):

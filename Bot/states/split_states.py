@@ -21,19 +21,5 @@ class SplitStates(StatesGroup):
     sfr_group = State()
     sfr_name = State()
 
-    texts = {
-        'SplitStates:waiting_for_url': 'Отправьте ссылку на сплиты',
-        'SplitStates:waiting_for_program': 'Выберите программу',
-        'SplitStates:waiting_for_type_distance': 'Выберите тип дистанции',
-        'SplitStates:winorient_splits': 'Выберите группу',
-        'SplitStates:winorient_analiz': 'Выберите тип дистанции',
-        'SplitStates:winorient_group': 'Выберите группу',
-        'SplitStates:winorient_name': 'Выберите участника',
-        'SplitStates:sportorg_splits': 'Выберите группу',
-        'SplitStates:sportorg_analiz': '<UNK> <UNK> <UNK> <UNK> <UNK>',
-        'SplitStates:group_name': 'Выберите участника',
-        'SplitStates:person_name': 'Для выбора другого участника нажмите назад ещё раз',
-        'SplitStates:sfr_splits': '<UNK> <UNK> <UNK> <UNK> <UNK>',
-        'SplitStates:sfr_analiz': '<UNK> <UNK> <UNK> <UNK> <UNK>',
-    }
-
+    get_count_persons = State()
+    get_names_for_comparing = State()

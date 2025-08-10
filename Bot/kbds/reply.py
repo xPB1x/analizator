@@ -34,6 +34,7 @@ analiz_kb = ReplyKeyboardMarkup(
 
 func_kb = ReplyKeyboardMarkup(
     keyboard=[
+        [KeyboardButton(text='Сравнить группу спортсменов (DEMO, только WinOrient)')],
         [KeyboardButton(text='Проигрыш по перегонам')],
         [KeyboardButton(text='Топ10 на каждом перегоне в группе')],
         [KeyboardButton(text='Топ10 на каждом перегоне среди всех участников')],

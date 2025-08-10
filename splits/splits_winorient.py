@@ -8,7 +8,7 @@ class SplitsWinOrient:
         self.soup = BeautifulSoup(html, 'html.parser')
         self.groups = self.get_groups()
 
-    def get_groups(self): # +
+    def get_groups(self):
         """Получает код-html каждой группы"""
         groups = {}
         group_names = [h2.text.split(',')[0] for h2 in self.soup.findAll('h2')]
@@ -26,7 +26,7 @@ class SplitsWinOrient:
 
         return sorted(list(splits))
 
-    def get_persons_by_group(self, group_name): # +
+    def get_persons_by_group(self, group_name):
         """Возвращает список имен участников группы"""
         persons = []
         group_html = self.groups[group_name]
@@ -45,7 +45,7 @@ class SplitsWinOrient:
 
         return persons
 
-    def get_person_splits(self, group_name, name): # +
+    def get_person_splits(self, group_name, name):
         """Создает словарь, с информацией о спортсмене и его отметках"""
         sportsman = {}
         group_html = self.groups[group_name]
@@ -364,3 +364,34 @@ class SplitsWinOrient:
                 break
 
         return top
+
+    def comparing_peoples(self, group_name, persons):
+        report = ""
+        controls = self.get_group_splits(group_name)
+        for control in controls:
+            report += self.get_top_on_leg_special(group_name, persons, control)
+            report += '***\n'
+
+        return report
+
+    def get_top_on_leg_special(self, group_name, persons, search_leg):
+        report = ""
+        top10 = [{f"99:99:0{i}": []} for i in range(10)]
+        for person in persons:
+            person_splits = self.get_person_splits(group_name, person)[person]
+            for leg, time in person_splits.items():
+                if leg == search_leg:
+                    top10 = self.check_top_time(top10, time, person)
+
+        report += f"{search_leg}\n"
+
+        for i, inf in enumerate(top10):
+            if inf == 0:
+                continue
+            time = [x for x in inf.keys()][0]
+            if time[0] == '9':
+                continue
+            names = '\n                     '.join([name for name in inf[time]])
+            report += f"{i + 1} {time} {names}\n"
+
+        return report
